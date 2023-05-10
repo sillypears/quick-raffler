@@ -3,6 +3,8 @@ from random import shuffle, choice
 from math import ceil
 import sys
 import time
+import progressbar
+
 
 def read_in_emails() -> list:
   emails = []
@@ -21,11 +23,11 @@ def remove_dupes(emails: list) -> list:
 
 def randomize_list(emails: list, times: int) -> list:
 
-  for x in range(0, times):
+  for x in progressbar.progressbar(range(0, times)):
     shuffle(emails)
-    print(".", end="", flush=True)
+    # print(".", end="", flush=True)
+    progressbar.streams.flush()
     time.sleep(0.01)
-  print()
   return emails
 
 def pick_winners(emails: list, picks: int) -> list:
