@@ -42,19 +42,15 @@ def pick_winners(emails: list, picks: int) -> list:
 def main():
 
   parser = argparse.ArgumentParser()
-  parser.add_argument('-f', '--file', dest="emails", help="A file with all the emails")
+  parser.add_argument('-f', '--file', dest="emails", required=True, help="A file with all the emails")
   parser.add_argument('-s', '--shuffle', default=5, dest="shuffle", type=int, help="The amount of times to shuffle the list")
   parser.add_argument('-w', '--winners', default=1, dest="winners", type=int, help="The number of winners to pick")
   parser.add_argument('-p', '--public', default=False, dest="public", action="store_true", help="Hide output")
   args = parser.parse_args()
 
   print(f"Shuffling {args.shuffle} times and picking {args.winners} winners")
-  if args.emails:
-    # parse emails
-    with open(args.emails, 'r') as f:
-      emails = f.readlines()
-  else:
-    emails = read_in_emails()
+  with open(args.emails, 'r') as f:
+    emails = f.readlines()
 
 
   print("Removing duplicates")
