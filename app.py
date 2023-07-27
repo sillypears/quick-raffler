@@ -1,5 +1,6 @@
 import argparse
-from random import shuffle, choice
+from secrets import choice
+from random import shuffle
 from math import ceil
 import sys
 import time
@@ -10,11 +11,11 @@ def read_in_emails() -> list:
   emails = []
   try:
     emails = input("Paste all the emails: ").split('\n')
-  except:
-    print("Couldn't parse emails")
+  except Exception as e:
+    print(f"Couldn't parse emails: {e}")
   return emails
 
-def remove_dupes(emails: list) -> list:
+def remove_dupes(emails: list) -> tuple[list, str]:
   unduped = []
   dupes = 0
   [unduped.append(x.strip()) for x in emails if x.strip() not in unduped]
@@ -23,7 +24,7 @@ def remove_dupes(emails: list) -> list:
 
 def randomize_list(emails: list, times: int) -> list:
 
-  for x in progressbar.progressbar(range(0, times)):
+  for _ in progressbar.progressbar(range(0, times)):
     shuffle(emails)
     # print(".", end="", flush=True)
     progressbar.streams.flush()
@@ -32,7 +33,7 @@ def randomize_list(emails: list, times: int) -> list:
 
 def pick_winners(emails: list, picks: int) -> list:
   winners = []
-  for x in range(0, picks):
+  for _ in range(0, picks):
     winner = choice(emails)
     winners.append(winner)
     emails.pop(emails.index(winner))
@@ -46,6 +47,7 @@ def main():
   parser.add_argument('-s', '--shuffle', default=5, dest="shuffle", type=int, help="The amount of times to shuffle the list")
   parser.add_argument('-w', '--winners', default=1, dest="winners", type=int, help="The number of winners to pick")
   parser.add_argument('-p', '--public', default=False, dest="public", action="store_true", help="Hide output")
+  parser.add_argument('-o' '--output-json', default=False, dest="output_json", action="store_true", help="Create json output for importing into script")
   args = parser.parse_args()
 
   print(f"Shuffling {args.shuffle} times and picking {args.winners} winners")
