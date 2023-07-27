@@ -160,6 +160,6 @@ cython_debug/
 #.idea/
 
 *list*.txt
-*_winners.txt
+*_winners.*
 Scripts/*
 .scannerwork/*

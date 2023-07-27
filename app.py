@@ -3,12 +3,20 @@ from secrets import choice
 from random import shuffle
 from math import ceil
 import sys
+import json
 import time
 import progressbar
 
+class WinnerJSON(object):
+  def __init__(self, email: str, description: str, shipping: int = 5):
+    self.email = email
+    self.desc = description
+    self.shipping = shipping
 
+  def to_json(self) -> dict:
+    return { "email": self.email, "description": self.desc, "shipping": self.shipping }
+  
 def read_in_emails() -> list:
-  emails = []
   try:
     emails = input("Paste all the emails: ").split('\n')
   except Exception as e:
@@ -44,10 +52,12 @@ def main():
 
   parser = argparse.ArgumentParser()
   parser.add_argument('-f', '--file', dest="emails", required=True, help="A file with all the emails")
+  parser.add_argument('-n', '--raffle-name', dest="raffle", required=True, help="Name of the raffle")
   parser.add_argument('-s', '--shuffle', default=5, dest="shuffle", type=int, help="The amount of times to shuffle the list")
   parser.add_argument('-w', '--winners', default=1, dest="winners", type=int, help="The number of winners to pick")
   parser.add_argument('-p', '--public', default=False, dest="public", action="store_true", help="Hide output")
   parser.add_argument('-o' '--output-json', default=False, dest="output_json", action="store_true", help="Create json output for importing into script")
+  parser.add_argument('-u', '--shipping', default=5, dest="shipping", help="Override default shipping cost of $5")
   args = parser.parse_args()
 
   print(f"Shuffling {args.shuffle} times and picking {args.winners} winners")
@@ -76,6 +86,12 @@ def main():
   else:
     for w in winners:
       print("\t{}".format(w))
+
+  if args.output_json:
+    with open(f"{args.raffle}_winners.json", 'w') as f:
+      for w in winners:
+        f.write(json.dumps(WinnerJSON(email=w, description="", shipping=args.shipping).to_json()))
+      
   return 0
 
 if __name__ == "__main__":
