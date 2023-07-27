@@ -162,3 +162,4 @@ cython_debug/
 *list*.txt
 *_winners.txt
 Scripts/*
+.scannerwork/*
