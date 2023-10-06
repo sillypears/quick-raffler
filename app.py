@@ -2,10 +2,14 @@ import argparse
 from secrets import choice
 from random import shuffle
 from math import ceil
-import sys
+import os, sys
 import json
 import time
 import progressbar
+import requests
+from dotenv import load_dotenv
+from random import randint
+load_dotenv()
 
 class WinnerJSON(object):
   def __init__(self, email: str, description: str, shipping: int = 5):
@@ -40,16 +44,39 @@ def randomize_list(emails: list, times: int) -> list:
   return emails
 
 def pick_winners(emails: list, picks: int) -> list:
-  winners = []
-  for _ in range(0, picks):
-    winner = choice(emails)
-    winners.append(winner)
-    emails.pop(emails.index(winner))
+  winners = set()
+  random_number_list = get_random_number(n=picks, max=len(emails))
+  for x in random_number_list:
+    winners.add(emails[x-1])
+  while len(winners) != picks:
+    print("Found a dupe winner, trying again")
+    winners.add(choice(emails))
   
-  return winners
+  return list(winners)
+
+def get_random_number(n:int=1, max:int=100) -> list[int]:
+    data = {
+        "jsonrpc": "2.0",
+        "method": "generateIntegers",
+        "params": {
+            "apiKey": os.environ.get("RANDOM_ORG_API"),
+            "n": n,
+            "min": 1,
+            "max": max,
+            "replacement": True
+        },
+        "id": 1
+    }
+    headers = {
+            'Content-Type': 'application/json'
+    }
+    res = requests.post(f"https://api.random.org/json-rpc/2/invoke", headers=headers, json=data)
+    if res.status_code == 200:
+      randList = json.loads(res.content)['result']['random']['data']
+      return randList
+    return randint(1, max) 
 
 def main():
-
   parser = argparse.ArgumentParser()
   parser.add_argument('-f', '--file', dest="emails", required=True, help="A file with all the emails")
   parser.add_argument('-n', '--raffle-name', dest="raffle", required=True, help="Name of the raffle")
@@ -63,7 +90,6 @@ def main():
   print(f"Shuffling {args.shuffle} times and picking {args.winners} winners")
   with open(args.emails, 'r') as f:
     emails = f.readlines()
-
 
   print("Removing duplicates")
   emails, dupes = remove_dupes(emails)
