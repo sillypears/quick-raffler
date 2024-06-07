@@ -35,10 +35,8 @@ def remove_dupes(emails: list) -> tuple[list, str]:
   return unduped, dupes
 
 def randomize_list(emails: list, times: int) -> list:
-
   for _ in progressbar.progressbar(range(0, times)):
     shuffle(emails)
-    # print(".", end="", flush=True)
     progressbar.streams.flush()
     time.sleep(0.01)
   return emails
@@ -83,9 +81,19 @@ def main():
   parser.add_argument('-s', '--shuffle', default=5, dest="shuffle", type=int, help="The amount of times to shuffle the list")
   parser.add_argument('-w', '--winners', default=1, dest="winners", type=int, help="The number of winners to pick")
   parser.add_argument('-p', '--public', default=False, dest="public", action="store_true", help="Hide output")
+  parser.add_argument('-d', '--description', default="", dest="description", help="Name of what they won")
   parser.add_argument('-o' '--output-json', default=False, dest="output_json", action="store_true", help="Create json output for importing into script")
   parser.add_argument('-u', '--shipping', default=5, dest="shipping", help="Override default shipping cost of $5")
   args = parser.parse_args()
+
+  banlist = []
+  if os.path.exists("banlist.txt"):
+    with open("banlist.txt", 'r') as f:
+      banlist = f.read().split()
+  else:
+    print("banlist.txt doesn't exist, creating empty one")
+    with open("banlist.txt", 'w') as w:
+      w.write('')
 
   print(f"Shuffling {args.shuffle} times and picking {args.winners} winners")
   with open(args.emails, 'r') as f:
@@ -101,7 +109,7 @@ def main():
   emails = randomize_list(emails, args.shuffle)
   print(f"Picking {args.winners} winners")
   winners = pick_winners(emails, args.winners)
-  print(f"There were {len(emails) + len(winners)} entries and {len(winners)} winners picked. Also {dupes} dupes")
+  print(f"There were {len(emails)} entries and {len(winners)} winners picked. Also {dupes} dupes")
 
   if args.public: 
     for w in winners:
